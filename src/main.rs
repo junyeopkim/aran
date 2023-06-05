@@ -26,6 +26,19 @@ async fn index(data: web::Data<AppStateWithCounter>) -> impl Responder {
     format!("Request number: {counter}")
 }
 
+#[get("/show")]
+async fn show_users() -> impl Responder {
+    HttpResponse::Ok().body("show users")
+}
+
+fn scoped_config(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::resource("/test")
+            .route(web::get().to(|| async { HttpResponse::Ok().body("test") }))
+            .route(web::head().to(HttpResponse::MethodNotAllowed)),
+    );
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let counter = web::Data::new(AppStateWithCounter {
@@ -42,8 +55,13 @@ async fn main() -> std::io::Result<()> {
                     .app_data(counter.clone())
                     .route("/index.html", web::get().to(index))
             )
+            .service(
+                web::scope("/users")
+                    .service(show_users)
+                    .configure(scoped_config)
+            )
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await
 }
