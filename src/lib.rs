@@ -1,6 +1,5 @@
-#[warn(dead_code)]
-fn merong() -> &'static str {
-    "merong"
+pub fn merong() -> String {
+    "merong".to_string()
 }
 
 #[cfg(test)]
